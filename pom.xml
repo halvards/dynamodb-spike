@@ -15,6 +15,8 @@
 
         <junit.version>4.12</junit.version>
         <hamcrest.version>1.3</hamcrest.version>
+        <dynamodb-local.version>1.10.5.1</dynamodb-local.version>
+        <sqlite4java.version>1.0.392</sqlite4java.version>
     </properties>
 
     <dependencies>
@@ -44,7 +46,15 @@
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>DynamoDBLocal</artifactId>
-            <version>1.10.5.1</version>
+            <version>${dynamodb-local.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.almworks.sqlite4java</groupId>
+            <artifactId>libsqlite4java-osx</artifactId>
+            <version>${sqlite4java.version}</version>
+            <type>dylib</type>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -61,16 +71,53 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>2.6</version>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <addClasspath>true</addClasspath>
-                            <mainClass>com.skogsrud.halvard.dynamodb.spike.Launch</mainClass>
-                        </manifest>
-                    </archive>
-                </configuration>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.10</version>
+                <executions>
+                    <execution>
+                        <id>copy-sqlite4java-native-libs</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>com.almworks.sqlite4java</groupId>
+                                    <artifactId>libsqlite4java-linux-i386</artifactId>
+                                    <version>${sqlite4java.version}</version>
+                                    <type>so</type>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.almworks.sqlite4java</groupId>
+                                    <artifactId>libsqlite4java-linux-amd64</artifactId>
+                                    <version>${sqlite4java.version}</version>
+                                    <type>so</type>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.almworks.sqlite4java</groupId>
+                                    <artifactId>sqlite4java-win32-x86</artifactId>
+                                    <version>${sqlite4java.version}</version>
+                                    <type>dll</type>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.almworks.sqlite4java</groupId>
+                                    <artifactId>sqlite4java-win32-x64</artifactId>
+                                    <version>${sqlite4java.version}</version>
+                                    <type>dll</type>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.almworks.sqlite4java</groupId>
+                                    <artifactId>libsqlite4java-osx</artifactId>
+                                    <version>${sqlite4java.version}</version>
+                                    <type>dylib</type>
+                                </artifactItem>
+                            </artifactItems>
+                            <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                            <overWriteIfNewer>true</overWriteIfNewer>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
