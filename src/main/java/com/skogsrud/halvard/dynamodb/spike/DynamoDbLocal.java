@@ -3,6 +3,11 @@ package com.skogsrud.halvard.dynamodb.spike;
 import com.amazonaws.services.dynamodbv2.local.main.ServerRunner;
 import com.amazonaws.services.dynamodbv2.local.server.DynamoDBProxyServer;
 
+/**
+ * Local, in-memory DynamoDB simulator.
+ *
+ * http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Tools.DynamoDBLocal.html
+ */
 public class DynamoDbLocal {
     private final DynamoDBProxyServer server;
     private final String port;
@@ -15,11 +20,11 @@ public class DynamoDbLocal {
         System.setProperty("sqlite4java.library.path", "target/lib");
         port = String.valueOf(PortResolver.findOpenPort());
         server = ServerRunner.createServerFromCommandLineArgs(new String[]{"-inMemory", "-port", port});
+        ensureDynamoDbIsStoppedOnShutdown();
     }
 
     public void run() throws Exception {
         server.start();
-        ensureDynamoDbIsStoppedOnShutdown();
     }
 
     public String getPort() {

@@ -14,7 +14,7 @@ public class DynamoDbTest {
     private static DynamoDBProxyServer server;
 
     @BeforeClass
-    public static void beforeAll() throws Exception {
+    public static void beforeClass() throws Exception {
         configureEnvironment();
         port = String.valueOf(PortResolver.findOpenPort());
         server = ServerRunner.createServerFromCommandLineArgs(new String[]{"-inMemory", "-port", port});
@@ -22,7 +22,7 @@ public class DynamoDbTest {
     }
 
     @AfterClass
-    public static void afterAll() throws Exception {
+    public static void afterClass() throws Exception {
         server.stop();
     }
 
@@ -35,7 +35,7 @@ public class DynamoDbTest {
     }
 
     private static void configureEnvironment() {
-        setUpDummyAwsCredentials();
+        AwsCredentials.useDummy();
         /**
          * This is ugly! We have to tell SQLite4Java where the native sqlite libraries are located.
          * Our pom.xml file ensures they are copied from your local maven repository (~/.m2/repository)
@@ -44,13 +44,5 @@ public class DynamoDbTest {
          */
         SQLite.setLibraryPath("target/lib");
 //        SQLite.setLibraryPath(System.getenv("HOME") + "/.m2/repository/com/almworks/sqlite4java/libsqlite4java-osx/1.0.392");
-    }
-
-    /**
-     * The AWS SDK requires credentials to be set up, even if we only talk to DynamoDB Local.
-     */
-    private static void setUpDummyAwsCredentials() {
-        System.setProperty("aws.accessKeyId", "dummyAccessKeyId");
-        System.setProperty("aws.secretKey", "dummySecretKey");
     }
 }

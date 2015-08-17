@@ -2,34 +2,33 @@ package com.skogsrud.halvard.dynamodb.spike;
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.dynamodbv2.model.ListTablesResult;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import static spark.Spark.get;
 
 public class Launch {
-    private final DynamoDbLocal dynamoDbLocal;
+    private final DynamoDbLocal dynamoDbServer;
+    private final ObjectMapper objectMapper;
 
     public static void main(String[] args) throws Exception {
-        new Launch().run();
+        new Launch(new ObjectMapper()).run();
     }
 
-    public Launch() throws Exception {
-        this.dynamoDbLocal = new DynamoDbLocal();
-        setUpDummyAwsCredentials();
+    public Launch(ObjectMapper objectMapper) throws Exception {
+        this.objectMapper = objectMapper;
+        this.dynamoDbServer = new DynamoDbLocal();
+        AwsCredentials.useDummy();
     }
 
     public void run() throws Exception {
-        dynamoDbLocal.run();
+        dynamoDbServer.run();
 
         get("/listtables", (request, response) -> {
-            AmazonDynamoDBClient client = new AmazonDynamoDBClient();
-            client.setEndpoint("http://localhost:" + dynamoDbLocal.getPort());
-            ListTablesResult listTablesResult = client.listTables();
-            return listTablesResult.toString();
-        });
+            AmazonDynamoDBClient dynamoDbClient = new AmazonDynamoDBClient();
+            dynamoDbClient.setEndpoint("http://localhost:" + dynamoDbServer.getPort());
+            ListTablesResult listTablesResult = dynamoDbClient.listTables();
+            return listTablesResult;
+        }, objectMapper::writeValueAsString);
     }
 
-    private static void setUpDummyAwsCredentials() {
-        System.setProperty("aws.accessKeyId", "dummyAccessKeyId");
-        System.setProperty("aws.secretKey", "dummySecretKey");
-    }
 }
