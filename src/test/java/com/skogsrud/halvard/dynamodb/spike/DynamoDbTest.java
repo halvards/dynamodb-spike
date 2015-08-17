@@ -9,9 +9,6 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.io.IOException;
-import java.net.ServerSocket;
-
 public class DynamoDbTest {
     private static String port;
     private static DynamoDBProxyServer server;
@@ -19,7 +16,7 @@ public class DynamoDbTest {
     @BeforeClass
     public static void beforeAll() throws Exception {
         configureEnvironment();
-        port = String.valueOf(findOpenPort());
+        port = String.valueOf(PortResolver.findOpenPort());
         server = ServerRunner.createServerFromCommandLineArgs(new String[]{"-inMemory", "-port", port});
         server.start();
     }
@@ -55,14 +52,5 @@ public class DynamoDbTest {
     private static void setUpDummyAwsCredentials() {
         System.setProperty("aws.accessKeyId", "dummyAccessKeyId");
         System.setProperty("aws.secretKey", "dummySecretKey");
-    }
-
-    /**
-     * Allows the test to be run on an arbitrary free port.
-     */
-    public static int findOpenPort() throws IOException {
-        try (ServerSocket socket = new ServerSocket(0)) {
-            return socket.getLocalPort();
-        }
     }
 }
