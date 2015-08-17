@@ -13,22 +13,37 @@ public class DynamoDbLocal {
     private final String port;
 
     public static void main(String[] args) throws Exception {
-        new DynamoDbLocal().run();
+        new DynamoDbLocal().start();
     }
 
     public DynamoDbLocal() throws Exception {
-        System.setProperty("sqlite4java.library.path", "target/lib");
+        configureSqlite();
         port = String.valueOf(PortResolver.findOpenPort());
         server = ServerRunner.createServerFromCommandLineArgs(new String[]{"-inMemory", "-port", port});
         ensureDynamoDbIsStoppedOnShutdown();
     }
 
-    public void run() throws Exception {
+    public void start() throws Exception {
         server.start();
+    }
+
+    public void stop() throws Exception {
+        server.stop();
     }
 
     public String getPort() {
         return port;
+    }
+
+    /**
+     * This is ugly! We have to tell SQLite4Java where the native sqlite libraries are located.
+     * Our pom.xml file ensures they are copied from your local maven repository (~/.m2/repository)
+     * to target/lib on compilation.
+     *
+     * See this site for further details: https://code.google.com/p/sqlite4java/wiki/UsingWithMaven
+     */
+    private void configureSqlite() {
+        System.setProperty("sqlite4java.library.path", "target/lib");
     }
 
     private void ensureDynamoDbIsStoppedOnShutdown() {

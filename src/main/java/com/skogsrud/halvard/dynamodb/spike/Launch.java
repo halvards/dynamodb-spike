@@ -1,14 +1,15 @@
 package com.skogsrud.halvard.dynamodb.spike;
 
+import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
-import com.amazonaws.services.dynamodbv2.model.ListTablesResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import static spark.Spark.get;
 
 public class Launch {
-    private final DynamoDbLocal dynamoDbServer;
     private final ObjectMapper objectMapper;
+    private final DynamoDbLocal dynamoDbServer;
+    private final AmazonDynamoDBClient dynamoDbClient;
 
     public static void main(String[] args) throws Exception {
         new Launch(new ObjectMapper()).run();
@@ -16,19 +17,15 @@ public class Launch {
 
     public Launch(ObjectMapper objectMapper) throws Exception {
         this.objectMapper = objectMapper;
-        this.dynamoDbServer = new DynamoDbLocal();
-        AwsCredentials.useDummy();
+        dynamoDbServer = new DynamoDbLocal();
+        dynamoDbServer.start();
+        dynamoDbClient = new AmazonDynamoDBClient(new BasicAWSCredentials("accessKey", "secretKey"));
+        dynamoDbClient.setEndpoint("http://localhost:" + dynamoDbServer.getPort());
     }
 
     public void run() throws Exception {
-        dynamoDbServer.run();
-
         get("/listtables", (request, response) -> {
-            AmazonDynamoDBClient dynamoDbClient = new AmazonDynamoDBClient();
-            dynamoDbClient.setEndpoint("http://localhost:" + dynamoDbServer.getPort());
-            ListTablesResult listTablesResult = dynamoDbClient.listTables();
-            return listTablesResult;
+            return dynamoDbClient.listTables();
         }, objectMapper::writeValueAsString);
     }
-
 }
