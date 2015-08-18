@@ -36,7 +36,6 @@ public class DynamoDbTest {
         client.setEndpoint("http://localhost:" + port);
         ListTablesResult listTablesResult = client.listTables();
         assertThat(listTablesResult.getTableNames(), empty());
-        client.createTable(new CreateTableRequest())
     }
 
     private static void configureEnvironment() {
