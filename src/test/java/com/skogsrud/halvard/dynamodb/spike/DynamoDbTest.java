@@ -4,6 +4,7 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.dynamodbv2.local.main.ServerRunner;
 import com.amazonaws.services.dynamodbv2.local.server.DynamoDBProxyServer;
+import com.amazonaws.services.dynamodbv2.model.CreateTableRequest;
 import com.amazonaws.services.dynamodbv2.model.ListTablesResult;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -20,7 +21,7 @@ public class DynamoDbTest {
     public static void beforeClass() throws Exception {
         configureEnvironment();
         port = String.valueOf(PortResolver.findOpenPort());
-        server = ServerRunner.createServerFromCommandLineArgs(new String[]{"-inMemory", "-port", port});
+        server = ServerRunner.createServerFromCommandLineArgs(new String[]{"-sharedDb", "-inMemory", "-port", port});
         server.start();
     }
 
@@ -35,6 +36,7 @@ public class DynamoDbTest {
         client.setEndpoint("http://localhost:" + port);
         ListTablesResult listTablesResult = client.listTables();
         assertThat(listTablesResult.getTableNames(), empty());
+        client.createTable(new CreateTableRequest())
     }
 
     private static void configureEnvironment() {

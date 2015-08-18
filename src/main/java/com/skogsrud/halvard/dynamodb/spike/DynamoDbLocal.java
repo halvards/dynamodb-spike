@@ -19,7 +19,7 @@ public class DynamoDbLocal {
     public DynamoDbLocal() throws Exception {
         configureSqlite();
         port = String.valueOf(PortResolver.findOpenPort());
-        server = ServerRunner.createServerFromCommandLineArgs(new String[]{"-inMemory", "-port", port});
+        server = ServerRunner.createServerFromCommandLineArgs(new String[]{"-sharedDb", "-inMemory", "-port", port});
         ensureDynamoDbIsStoppedOnShutdown();
     }
 
